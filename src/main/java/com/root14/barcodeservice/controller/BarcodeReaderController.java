@@ -29,7 +29,6 @@ public class BarcodeReaderController {
     //todo add custom return object
     @PostMapping(value = "/read", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> readBarcode(@RequestParam(value = "data") MultipartFile barcodeFile, @RequestParam(value = "hint", required = false) Map<DecodeHintType, Object> hints) throws NotFoundException, IOException {
-
         Result result = barcodeService.read(barcodeFile, hints);
         return ResponseEntity.ok().body(result);
     }

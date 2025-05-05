@@ -30,10 +30,21 @@ public class QrGenerator implements Generator {
 
     /**
      * @param minSize 1:1, 1:2, 2:3
+     * @param ratio   for 2:3 -> 2.3
      */
-    public void generateQr(String data, int minSize) {
+    public BufferedImage generateQr(String data, int minSize, String ratio) {
         //todo calculate width and height
         //todo add auto scale calculation
+
+        String[] parts = ratio.split(":");
+        float widthRatio = Float.parseFloat(parts[0]);
+        float heightRatio = Float.parseFloat(parts[1]);
+
+        float scaleFactor = minSize / heightRatio;
+        float scaledWidth = widthRatio * scaleFactor;
+
+        //return generateQr(data,scaledWidth,minSize)
+        return null;
     }
 
     /**
