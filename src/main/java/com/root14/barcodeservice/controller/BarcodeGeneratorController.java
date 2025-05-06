@@ -26,23 +26,21 @@ public class BarcodeGeneratorController {
     }
 
     /**
-     * @param type    gonna created barcode type
-     * @param data    barcode data -> todo add telephone, mailto: or etc
-     * @param minSize min barcode size. its uses for auto scale
-     * @param width   barcode width
-     * @param height  barcode height
+     * @param type   gonna created barcode type
+     * @param data   barcode data -> todo add telephone, mailto: or etc
+     * @param width  barcode width
+     * @param height barcode height
      * @throws IOException
      * @throws WriterException
      */
     @GetMapping("/generate")
     public ResponseEntity<?> generateBarcode(
-            @RequestParam(value = "type") String type,
+            @RequestParam(value = "type", required = true) String type,
             @RequestParam(value = "data", required = true) String data,
-            @RequestParam(value = "minSize", required = false) String minSize,
             @RequestParam(value = "width", required = false) String width,
             @RequestParam(value = "height", required = false) String height) throws IOException, WriterException {
 
-        if (minSize == null && (height == null || width == null)) {
+        if (height == null || width == null) {
             return ResponseEntity.badRequest().body("minSize or (height and width) must not be null.");
         }
 
