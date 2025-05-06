@@ -1,8 +1,5 @@
 package com.root14.barcodeservice.config;
 
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.root14.barcodeservice.core.BarcodeGenerator;
-import com.root14.barcodeservice.core.BarcodeReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;

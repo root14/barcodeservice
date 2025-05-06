@@ -1,5 +1,6 @@
 package com.root14.barcodeservice.config;
 
+import com.root14.barcodeservice.DynamicBeanManager;
 import com.root14.barcodeservice.core.BarcodeGenerator;
 import com.root14.barcodeservice.core.BarcodeReader;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,11 @@ public class CoreBeanProvider {
     @Lazy
     public BarcodeReader provideBarcodeReader() {
         return new BarcodeReader();
+    }
+
+    @Bean
+    public DynamicBeanManager provideDynamicBeanManager() {
+        return new DynamicBeanManager();
     }
 
 }
