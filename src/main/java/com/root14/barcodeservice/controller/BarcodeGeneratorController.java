@@ -38,7 +38,7 @@ public class BarcodeGeneratorController {
             @RequestParam(value = "height", required = false) String height) throws IOException, WriterException {
 
         if (height == null || width == null) {
-            return ResponseEntity.badRequest().body("minSize or (height and width) must not be null.");
+            return ResponseEntity.badRequest().body("height and width must not be null.");
         }
 
         byte[] generated = barcodeService.generate(type, data, Integer.parseInt(width), Integer.parseInt(height));

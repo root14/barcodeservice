@@ -1,20 +1,24 @@
 package com.root14.barcodeservice.config;
 
-import com.google.zxing.qrcode.QRCodeWriter;
 import com.root14.barcodeservice.core.BarcodeGenerator;
 import com.root14.barcodeservice.core.BarcodeReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import java.io.ByteArrayOutputStream;
-
 @Configuration
-public class BeanProvider {
+public class CoreBeanProvider {
 
     @Bean
     @Lazy
-    public ByteArrayOutputStream provideByteArrayOutputStream() {
-        return new ByteArrayOutputStream();
+    public BarcodeGenerator provideBarcodeGenerator() {
+        return new BarcodeGenerator();
     }
+
+    @Bean
+    @Lazy
+    public BarcodeReader provideBarcodeReader() {
+        return new BarcodeReader();
+    }
+
 }

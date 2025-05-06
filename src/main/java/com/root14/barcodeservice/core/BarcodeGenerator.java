@@ -4,16 +4,17 @@ import com.google.zxing.*;
 import com.google.zxing.client.j2se.MatrixToImageConfig;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.awt.image.BufferedImage;
 import java.util.Map;
 
-public class QrGenerator implements Generator {
-    private final QRCodeWriter qrCodeWriter;
+public class BarcodeGenerator implements Generator {
+    Writer writer;
+   public BarcodeFormat barcodeFormat;
 
-    public QrGenerator(QRCodeWriter qrCodeWriter) {
-        this.qrCodeWriter = qrCodeWriter;
+    @Override
+    public BufferedImage generate(String data, int width, int height) throws WriterException {
+        return generateQr(data, width, height);
     }
 
     public BufferedImage generateQr(String data, int width, int height, Map<EncodeHintType, Object> hints) throws WriterException {
@@ -33,13 +34,26 @@ public class QrGenerator implements Generator {
      * @apiNote hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
      */
     public BufferedImage generateQr(String data, int width, int height, MatrixToImageConfig config, Map<EncodeHintType, Object> hints) throws WriterException {
-        BitMatrix bitMatrix = qrCodeWriter.encode(data, BarcodeFormat.QR_CODE, width, height, hints);
+        BitMatrix bitMatrix = writer.encode(data, barcodeFormat, width, height, hints);
 
         return (config != null) ? MatrixToImageWriter.toBufferedImage(bitMatrix, config) : MatrixToImageWriter.toBufferedImage(bitMatrix);
     }
 
-    @Override
-    public BufferedImage generate(String data, int width, int height) throws WriterException {
-        return generateQr(data, width, height);
+    public BarcodeFormat getBarcodeFormat() {
+        return barcodeFormat;
+    }
+
+    public BarcodeGenerator setBarcodeFormat(BarcodeFormat barcodeFormat) {
+        this.barcodeFormat = barcodeFormat;
+        return this;
+    }
+
+    public Writer getWriter() {
+        return writer;
+    }
+
+    public BarcodeGenerator setWriter(Writer writer) {
+        this.writer = writer;
+        return this;
     }
 }

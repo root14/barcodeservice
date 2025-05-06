@@ -26,7 +26,7 @@ public class BarcodeReaderController {
     public BarcodeReaderController(BarcodeService barcodeService) {
         this.barcodeService = barcodeService;
     }
-    
+
     @PostMapping(value = "/read", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> readBarcode(@RequestParam(value = "data") MultipartFile barcodeFile, @RequestParam(value = "hint", required = false) Map<DecodeHintType, Object> hints) throws NotFoundException, IOException {
         Result result = barcodeService.read(barcodeFile, hints);
