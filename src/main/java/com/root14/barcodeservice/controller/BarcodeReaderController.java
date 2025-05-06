@@ -3,6 +3,7 @@ package com.root14.barcodeservice.controller;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.Result;
+import com.root14.barcodeservice.core.model.BarcodeResult;
 import com.root14.barcodeservice.dto.ReadDto;
 import com.root14.barcodeservice.service.BarcodeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +26,22 @@ public class BarcodeReaderController {
     public BarcodeReaderController(BarcodeService barcodeService) {
         this.barcodeService = barcodeService;
     }
-
-    //todo add custom return object
+    
     @PostMapping(value = "/read", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> readBarcode(@RequestParam(value = "data") MultipartFile barcodeFile, @RequestParam(value = "hint", required = false) Map<DecodeHintType, Object> hints) throws NotFoundException, IOException {
         Result result = barcodeService.read(barcodeFile, hints);
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().body(new BarcodeResult(
+                        result.getTimestamp(),
+                        result.getText(),
+                        result.getBarcodeFormat()));
     }
 
-    //todo add custom return object
     @PostMapping(value = "/read", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> readBarcode(@RequestBody ReadDto data, @RequestParam(value = "hint", required = false) Map<DecodeHintType, Object> hints) throws NotFoundException, IOException {
         Result result = barcodeService.read(data.data(), hints);
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().body(new BarcodeResult(
+                result.getTimestamp(),
+                result.getText(),
+                result.getBarcodeFormat()));
     }
 }
