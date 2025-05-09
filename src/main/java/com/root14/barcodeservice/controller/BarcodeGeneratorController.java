@@ -24,7 +24,7 @@ public class BarcodeGeneratorController {
 
     /**
      * @param type   gonna created barcode type
-     * @param data   barcode data -> todo add telephone, mailto: or etc
+     * @param data   barcode data
      * @param width  barcode width
      * @param height barcode height
      * @throws IOException

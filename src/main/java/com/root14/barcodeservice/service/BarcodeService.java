@@ -43,7 +43,6 @@ public class BarcodeService {
         return barcodeReader.read(inputStream, hints);
     }
 
-    //todo add return type -> return as png,jpg or base64
     public byte[] generate(String type, String data, int width, int height) throws WriterException, IOException {
         BarcodeType barcodeType = BarcodeType.fromKey(type);
 
@@ -53,7 +52,8 @@ public class BarcodeService {
         BufferedImage generated = barcodeGenerator.generate(data, width, height);
         //clears the previous stream
         byteArrayOutputStream.reset();
-        ImageIO.write(generated, "jpg", byteArrayOutputStream);
+
+        ImageIO.write(generated, "png", byteArrayOutputStream);
         return byteArrayOutputStream.toByteArray();
     }
 }
