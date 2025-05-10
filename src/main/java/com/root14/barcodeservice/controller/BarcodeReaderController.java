@@ -3,7 +3,7 @@ package com.root14.barcodeservice.controller;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.Result;
-import com.root14.barcodeservice.core.model.BarcodeResult;
+import com.root14.barcodeservice.core.BarcodeResult;
 import com.root14.barcodeservice.dto.ReadDto;
 import com.root14.barcodeservice.service.BarcodeService;
 import org.springframework.beans.factory.annotation.Autowired;

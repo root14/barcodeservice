@@ -1,4 +1,4 @@
-package com.root14.barcodeservice.core.model;
+package com.root14.barcodeservice.core;
 
 import com.google.zxing.BarcodeFormat;
 
