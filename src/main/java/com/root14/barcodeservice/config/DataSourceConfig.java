@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 
 @Configuration
 public class DataSourceConfig {
-
     @Bean
     @ConditionalOnProperty(name = "app.database", havingValue = "enabled")
     public DataSource dataSource(DataSourceProperties properties) {

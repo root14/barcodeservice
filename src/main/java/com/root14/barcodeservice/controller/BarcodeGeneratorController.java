@@ -71,13 +71,22 @@ public class BarcodeGeneratorController {
      * @throws WriterException if the barcode writer fails to encode the data
      */
     @GetMapping("/generate")
-    public ResponseEntity<?> generateBarcode(@RequestParam(value = "type", required = true) String type, @RequestParam(value = "data", required = true) String data, @RequestParam(value = "width", required = false) String width, @RequestParam(value = "height", required = false) String height) throws IOException, WriterException {
+    public ResponseEntity<?> generateBarcode(@RequestParam(value = "type", required = true) String type,
+                                             @RequestParam(value = "data", required = true) String data,
+                                             @RequestParam(value = "width", required = false) String width,
+                                             @RequestParam(value = "height", required = false) String height,
+                                             @RequestParam(value = "name", required = false, defaultValue = "") String name)
+            throws IOException, WriterException {
 
         if (height == null || width == null) {
             return ResponseEntity.badRequest().body("height and width must not be null.");
         }
 
-        byte[] generated = barcodeService.generate(type, data, Integer.parseInt(width), Integer.parseInt(height));
+        byte[] generated = barcodeService.generate(type, data, Integer.parseInt(width), Integer.parseInt(height), name);
+
+        if (generated == null) {
+            return ResponseEntity.internalServerError().build();
+        }
 
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + UUID.randomUUID() + ".png").contentType(MediaType.IMAGE_PNG).body(generated);
     }
