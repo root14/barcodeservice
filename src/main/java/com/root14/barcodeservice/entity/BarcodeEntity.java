@@ -1,5 +1,6 @@
 package com.root14.barcodeservice.entity;
 
+import com.root14.barcodeservice.dto.ImageObject;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,15 +17,27 @@ public class BarcodeEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String imageName;
-
     @CreatedDate
     private Instant createdAt;
 
+    @Lob
+    private byte[] barcode;
 
-    public BarcodeEntity(String imageName, Instant createdAt) {
-        this.imageName = imageName;
-        this.createdAt = createdAt;
+    public BarcodeEntity(byte[] barcode) {
+        this.barcode = barcode;
+    }
+
+    public ImageObject getAsDto() {
+        return new ImageObject(getId().toString(), getBarcode(), getCreatedAt());
+    }
+
+    public byte[] getBarcode() {
+        return barcode;
+    }
+
+    public BarcodeEntity setBarcode(byte[] barcode) {
+        this.barcode = barcode;
+        return this;
     }
 
     public BarcodeEntity() {
@@ -36,15 +49,6 @@ public class BarcodeEntity {
 
     public BarcodeEntity setId(UUID id) {
         this.id = id;
-        return this;
-    }
-
-    public String getImageName() {
-        return imageName;
-    }
-
-    public BarcodeEntity setImageName(String imageName) {
-        this.imageName = imageName;
         return this;
     }
 

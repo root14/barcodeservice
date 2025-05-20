@@ -1,9 +1,9 @@
 package com.root14.barcodeservice.controller;
 
 import com.google.zxing.WriterException;
+import com.root14.barcodeservice.dto.ImageObject;
 import com.root14.barcodeservice.service.BarcodeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.util.Optional;
 
 /**
  * REST controller for handling barcode generation requests.
@@ -60,34 +60,53 @@ public class BarcodeGeneratorController {
     }
 
     /**
-     * Handles GET requests to generate a barcode image.
+     * Generates a barcode image based on the provided type and data, and returns the stored result.
      *
-     * @param type   the barcode format (e.g., CODE_128, QR_CODE)
-     * @param data   the content to encode in the barcode
-     * @param width  the desired width of the barcode image
-     * @param height the desired height of the barcode image
-     * @return a ResponseEntity containing the generated PNG image or an error message
+     * <p>This endpoint accepts the type of barcode (e.g., QR, CODE_128), the data to encode,
+     * optional dimensions (width and height), and an optional name. It generates the barcode image,
+     * stores it, and returns an {@link ImageObject} containing the UUID, image bytes, and creation timestamp.</p>
+     *
+     * <p>If barcode generation fails, a 500 Internal Server Error is returned.</p>
+     *
+     * @param type   the type of barcode to generate (e.g., "QR", "CODE_128")
+     * @param data   the data to be encoded in the barcode
+     * @param width  the width of the barcode image (optional, defaults to 400)
+     * @param height the height of the barcode image (optional, defaults to 400)
+     * @param store   an optional parameter for the generated barcode persist to database (default is false)
+     * @return a ResponseEntity containing the generated {@link ImageObject}, or a 500 error if generation fails
      * @throws IOException     if an I/O error occurs during barcode generation
-     * @throws WriterException if the barcode writer fails to encode the data
+     * @throws WriterException if barcode encoding fails
      */
     @GetMapping("/generate")
-    public ResponseEntity<?> generateBarcode(@RequestParam(value = "type", required = true) String type,
-                                             @RequestParam(value = "data", required = true) String data,
-                                             @RequestParam(value = "width", required = false) String width,
-                                             @RequestParam(value = "height", required = false) String height,
-                                             @RequestParam(value = "name", required = false, defaultValue = "") String name)
-            throws IOException, WriterException {
+    public ResponseEntity<?> generateBarcode(@RequestParam(value = "type", required = true) String type, @RequestParam(value = "data", required = true) String data, @RequestParam(value = "width", required = false, defaultValue = "400") int width, @RequestParam(value = "height", required = false, defaultValue = "400") int height, @RequestParam(value = "store", required = false, defaultValue = "false") boolean store) throws IOException, WriterException {
+        Optional<ImageObject> storedImage = barcodeService.generate(type, data, width, height, store);
 
-        if (height == null || width == null) {
-            return ResponseEntity.badRequest().body("height and width must not be null.");
-        }
-
-        byte[] generated = barcodeService.generate(type, data, Integer.parseInt(width), Integer.parseInt(height), name);
-
-        if (generated == null) {
+        if (storedImage.isEmpty()) {
             return ResponseEntity.internalServerError().build();
         }
 
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + UUID.randomUUID() + ".png").contentType(MediaType.IMAGE_PNG).body(generated);
+        ImageObject image = storedImage.get();
+        return ResponseEntity.ok().body(new ImageObject(image.uuid(), image.barcode(), image.createdAt()));
+    }
+
+    /**
+     * Retrieves the previously stored barcode image associated with the given UUID.
+     *
+     * <p>This endpoint returns a PNG image as an HTTP response if a barcode with the specified
+     * UUID exists. If no barcode is found, a 500 Internal Server Error is returned.</p>
+     *
+     * @param uuid the unique identifier used to locate the stored barcode
+     * @return a ResponseEntity containing the barcode image as a PNG file if found,
+     * or an Internal Server Error if not found
+     */
+    @GetMapping("/getBarcode")
+    public ResponseEntity<?> getBarcode(@RequestParam(value = "uuid", required = true) String uuid) {
+        Optional<ImageObject> storedImage = barcodeService.findBarcode(uuid);
+
+        if (storedImage.isEmpty()) {
+            return ResponseEntity.internalServerError().build();
+        }
+        ImageObject image = storedImage.get();
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + image.uuid() + ".png").contentType(MediaType.IMAGE_PNG).body(image.barcode());
     }
 }

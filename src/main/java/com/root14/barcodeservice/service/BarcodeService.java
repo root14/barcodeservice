@@ -4,6 +4,7 @@ import com.google.zxing.*;
 import com.root14.barcodeservice.core.BarcodeGenerator;
 import com.root14.barcodeservice.core.BarcodeReader;
 import com.root14.barcodeservice.core.BarcodeType;
+import com.root14.barcodeservice.dto.ImageObject;
 import com.root14.barcodeservice.entity.BarcodeEntity;
 import com.root14.barcodeservice.repository.BarcodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +22,17 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
+/**
+ * Service class responsible for barcode generation, reading, and persistence operations.
+ */
 @Service
 public class BarcodeService {
     private final ApplicationContext applicationContext;
 
-    //removed from Spring ioc. they created once anyway.
+    // Removed from Spring IoC, they are created once and reused.
     private final BarcodeGenerator barcodeGenerator = new BarcodeGenerator();
     private final BarcodeReader barcodeReader = new BarcodeReader();
     private final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -39,33 +45,76 @@ public class BarcodeService {
         this.barcodeRepository = barcodeRepository;
     }
 
+    /**
+     * Reads barcode data from an uploaded image file.
+     *
+     * @param data  the multipart file containing the barcode image
+     * @param hints decoding hints for barcode recognition
+     * @return the decoded barcode result
+     * @throws IOException       if reading the file fails
+     * @throws NotFoundException if no barcode is found in the image
+     */
     public Result read(MultipartFile data, Map<DecodeHintType, Object> hints) throws IOException, NotFoundException {
         return barcodeReader.read(data.getInputStream(), hints);
     }
 
+    /**
+     * Reads barcode data from a Base64-encoded image string.
+     *
+     * @param data  the Base64-encoded image data
+     * @param hints decoding hints for barcode recognition
+     * @return the decoded barcode result
+     * @throws IOException       if reading the data fails
+     * @throws NotFoundException if no barcode is found in the image
+     */
     public Result read(String data, Map<DecodeHintType, Object> hints) throws IOException, NotFoundException {
         byte[] decoded = Base64.getDecoder().decode(data.getBytes(StandardCharsets.UTF_8));
         InputStream inputStream = new ByteArrayInputStream(decoded);
         return barcodeReader.read(inputStream, hints);
     }
 
-    public byte[] generate(String type, String data, int width, int height, String desiredName) throws WriterException, IOException {
+    /**
+     * Generates a barcode image from the given data and saves it if a name is provided.
+     *
+     * @param type   the barcode type (e.g., "QR", "CODE_128")
+     * @param data   the data to encode in the barcode
+     * @param width  the width of the generated image
+     * @param height the height of the generated image
+     * @param store  to persist the barcode in the database
+     * @return an {@link Optional} containing the generated {@link ImageObject}, or empty if generation fails
+     * @throws WriterException if encoding the barcode fails
+     * @throws IOException     if writing the image fails
+     */
+    public Optional<ImageObject> generate(String type, String data, int width, int height, boolean store) throws WriterException, IOException {
         BarcodeType barcodeType = BarcodeType.fromKey(type);
 
         barcodeGenerator.setBarcodeFormat(barcodeType.getFormat());
         barcodeGenerator.setWriter(applicationContext.getBean(barcodeType.getWriterClass()));
 
         BufferedImage generated = barcodeGenerator.generate(data, width, height);
-        //clears the previous stream
+
+        // Clear the previous stream
         byteArrayOutputStream.reset();
         ImageIO.write(generated, "png", byteArrayOutputStream);
 
-        //save
-        if (!desiredName.isEmpty()) {
-            BarcodeEntity barcodeEntity = new BarcodeEntity(desiredName, Instant.now());
-            barcodeRepository.save(barcodeEntity);
+        // Save to database if a name is provided
+        if (store) {
+            BarcodeEntity barcodeEntity = new BarcodeEntity(byteArrayOutputStream.toByteArray());
+            BarcodeEntity storedEntity = barcodeRepository.save(barcodeEntity);
+            return Optional.of(new ImageObject(storedEntity.getId().toString(), byteArrayOutputStream.toByteArray(), storedEntity.getCreatedAt()));
+        } else {
+            return Optional.of(new ImageObject(null, byteArrayOutputStream.toByteArray(), Instant.now()));
         }
+    }
 
-        return byteArrayOutputStream.toByteArray();
+    /**
+     * Retrieves a previously stored barcode image by UUID.
+     *
+     * @param uuid the unique identifier of the barcode
+     * @return an {@link Optional} containing the found {@link ImageObject}, or empty if not found
+     */
+    public Optional<ImageObject> findBarcode(String uuid) {
+        Optional<BarcodeEntity> barcodeEntityOptional = barcodeRepository.findById(UUID.fromString(uuid));
+        return barcodeEntityOptional.map(BarcodeEntity::getAsDto);
     }
 }
