@@ -8,6 +8,7 @@ import com.root14.barcodeservice.dto.ImageObject;
 import com.root14.barcodeservice.entity.BarcodeEntity;
 import com.root14.barcodeservice.repository.BarcodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +27,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Service class responsible for barcode generation, reading, and persistence operations.
+ * Service class for handling barcode-related operations.
+ *
+ * <p>This service is designed to work in both database-enabled and non-database profiles.
+ * When the application runs in a profile without a database, the {@link BarcodeRepository}
+ * may not be available, and related logic should handle that case accordingly.</p>
+ *
+ * <p>Use this class to implement business logic related to barcodes.</p>
+ *
+ * @see BarcodeRepository
  */
 @Service
 public class BarcodeService {
@@ -39,8 +48,22 @@ public class BarcodeService {
 
     private final BarcodeRepository barcodeRepository;
 
+    @Value("${spring.profiles.active}")
+    private String profile;
+
+    /**
+     * Constructs a {@code BarcodeService} instance with optional access to the {@link BarcodeRepository}
+     * and access to the Spring {@link ApplicationContext}.
+     *
+     * <p>This constructor allows the service to be initialized even in environments where the
+     * {@code BarcodeRepository} is not available—e.g., when the application is running in a profile
+     * that does not connect to a database.</p>
+     *
+     * @param applicationContext the Spring application context, used for accessing beans and application metadata
+     * @param barcodeRepository the repository used for barcode data access; may be {@code null} in non-database profiles
+     */
     @Autowired
-    public BarcodeService(ApplicationContext applicationContext, BarcodeRepository barcodeRepository) {
+    public BarcodeService(ApplicationContext applicationContext, @Autowired(required = false) BarcodeRepository barcodeRepository) {
         this.applicationContext = applicationContext;
         this.barcodeRepository = barcodeRepository;
     }
@@ -98,7 +121,8 @@ public class BarcodeService {
         ImageIO.write(generated, "png", byteArrayOutputStream);
 
         // Save to database if a name is provided
-        if (store) {
+        // Save only postgres mode/profile
+        if (store && profile.equals("postgres")) {
             BarcodeEntity barcodeEntity = new BarcodeEntity(byteArrayOutputStream.toByteArray());
             BarcodeEntity storedEntity = barcodeRepository.save(barcodeEntity);
             return Optional.of(new ImageObject(storedEntity.getId().toString(), byteArrayOutputStream.toByteArray(), storedEntity.getCreatedAt()));
