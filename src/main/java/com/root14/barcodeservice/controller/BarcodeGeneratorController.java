@@ -60,29 +60,35 @@ public class BarcodeGeneratorController {
     }
 
     /**
-     * Generates a barcode image based on the provided type and data, and returns the stored result.
+     * Generates a barcode image based on the provided type and data.
      *
-     * <p>This endpoint accepts the type of barcode (e.g., QR, CODE_128), the data to encode,
-     * optional dimensions (width and height), and an optional name. It generates the barcode image,
-     * stores it, and returns an {@link ImageObject} containing the UUID, image bytes, and creation timestamp.</p>
+     * <p>This endpoint accepts the barcode type (e.g., "QR", "CODE_128"), the data to encode,
+     * optional dimensions (width and height), and a flag to store the generated barcode.
+     * It returns an {@link ImageObject} containing the UUID, image bytes, and creation timestamp.</p>
      *
-     * <p>If barcode generation fails, a 500 Internal Server Error is returned.</p>
-     *
-     * @param type   the type of barcode to generate (e.g., "QR", "CODE_128")
-     * @param data   the data to be encoded in the barcode
-     * @param width  the width of the barcode image (optional, defaults to 400)
-     * @param height the height of the barcode image (optional, defaults to 400)
-     * @param store   an optional parameter for the generated barcode persist to database (default is false)
-     * @return a ResponseEntity containing the generated {@link ImageObject}, or a 500 error if generation fails
-     * @throws IOException     if an I/O error occurs during barcode generation
-     * @throws WriterException if barcode encoding fails
+     * @param type   The type of barcode to generate (e.g., "QR", "CODE_128"). This parameter is **required**.
+     * @param data   The data to be encoded in the barcode. This parameter is **required**.
+     * @param width  The width of the barcode image in pixels (optional, defaults to 400).
+     * @param height The height of the barcode image in pixels (optional, defaults to 400).
+     * @param store  If {@code true}, the generated barcode will be persisted to the database (optional, defaults to {@code false}).
+     * @return A {@link ResponseEntity} containing the generated {@link ImageObject} on success.
+     * Returns a 404 Not Found if the barcode generation service returns an empty result,
+     * or a 500 Internal Server Error if an unexpected error occurs during generation.
+     * @throws IOException     If an I/O error occurs during barcode generation.
+     * @throws WriterException If an error occurs during barcode encoding (e.g., invalid data for the specified type).
      */
     @GetMapping("/generate")
-    public ResponseEntity<?> generateBarcode(@RequestParam(value = "type", required = true) String type, @RequestParam(value = "data", required = true) String data, @RequestParam(value = "width", required = false, defaultValue = "400") int width, @RequestParam(value = "height", required = false, defaultValue = "400") int height, @RequestParam(value = "store", required = false, defaultValue = "false") boolean store) throws IOException, WriterException {
+    public ResponseEntity<?> generateBarcode(
+            @RequestParam(value = "type", required = true) String type,
+            @RequestParam(value = "data", required = true) String data,
+            @RequestParam(value = "width", required = false, defaultValue = "400") int width,
+            @RequestParam(value = "height", required = false, defaultValue = "400") int height,
+            @RequestParam(value = "store", required = false, defaultValue = "false") boolean store
+    ) throws IOException, WriterException {
         Optional<ImageObject> storedImage = barcodeService.generate(type, data, width, height, store);
 
         if (storedImage.isEmpty()) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.notFound().build();
         }
 
         ImageObject image = storedImage.get();
@@ -90,23 +96,31 @@ public class BarcodeGeneratorController {
     }
 
     /**
-     * Retrieves the previously stored barcode image associated with the given UUID.
+     * Retrieves a previously stored barcode image by its UUID.
      *
-     * <p>This endpoint returns a PNG image as an HTTP response if a barcode with the specified
-     * UUID exists. If no barcode is found, a 500 Internal Server Error is returned.</p>
+     * <p>This endpoint fetches a barcode associated with the provided UUID. If found, it returns the barcode
+     * image as a PNG file with a 200 OK status. The image is sent with an `inline` content disposition,
+     * suggesting browsers display it directly. If no barcode is found for the given UUID, a 404 Not Found
+     * status is returned.</p>
      *
-     * @param uuid the unique identifier used to locate the stored barcode
-     * @return a ResponseEntity containing the barcode image as a PNG file if found,
-     * or an Internal Server Error if not found
+     * @param uuid The unique identifier (UUID) of the barcode to retrieve. This parameter is **required**.
+     * @return A {@link ResponseEntity} containing:
+     * <ul>
+     * <li>The barcode image as a PNG byte array with HTTP status 200 OK if found.</li>
+     * <li>HTTP status 404 Not Found if no barcode is associated with the provided UUID.</li>
+     * </ul>
      */
     @GetMapping("/getBarcode")
     public ResponseEntity<?> getBarcode(@RequestParam(value = "uuid", required = true) String uuid) {
         Optional<ImageObject> storedImage = barcodeService.findBarcode(uuid);
 
         if (storedImage.isEmpty()) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.notFound().build();
         }
         ImageObject image = storedImage.get();
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + image.uuid() + ".png").contentType(MediaType.IMAGE_PNG).body(image.barcode());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + image.uuid() + ".png")
+                .contentType(MediaType.IMAGE_PNG)
+                .body(image.barcode());
     }
 }
