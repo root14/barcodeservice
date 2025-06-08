@@ -25,7 +25,7 @@ class BarcodeGeneratorTest {
     }
 
     @Test
-    void testGenerateQr_withBasicParams_shouldReturnImage() throws WriterException {
+    void generate_withBasicParams_shouldReturnImage() throws WriterException {
         BufferedImage image = barcodeGenerator.generate("hello QR", 200, 200);
         assertNotNull(image);
         assertEquals(200, image.getWidth());
@@ -33,7 +33,7 @@ class BarcodeGeneratorTest {
     }
 
     @Test
-    void testGenerateQr_withHints_shouldReturnImage() throws WriterException {
+    void generate_withHints_shouldReturnImage() throws WriterException {
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
@@ -45,7 +45,7 @@ class BarcodeGeneratorTest {
     }
 
     @Test
-    void testGenerateQr_withConfigAndHints_shouldReturnImage() throws WriterException {
+    void generate_withConfigAndHints_shouldReturnImage() throws WriterException {
         MatrixToImageConfig config = new MatrixToImageConfig(MatrixToImageConfig.BLACK, MatrixToImageConfig.WHITE);
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.MARGIN, 1);
@@ -55,13 +55,13 @@ class BarcodeGeneratorTest {
     }
 
     @Test
-    void testGenerateQr_missingWriter_shouldThrowException() {
+    void generate_missingWriter_shouldThrowException() {
         BarcodeGenerator generator = new BarcodeGenerator().setBarcodeFormat(BarcodeFormat.QR_CODE);
         assertThrows(NullPointerException.class, () -> generator.generate("data", 100, 100));
     }
 
     @Test
-    void testGenerateQr_missingBarcodeFormat_shouldThrowException() {
+    void generate_missingBarcodeFormat_shouldThrowException() {
         BarcodeGenerator generator = new BarcodeGenerator().setWriter(new MultiFormatWriter());
         assertThrows(Exception.class, () -> generator.generate("data", 100, 100));
     }
