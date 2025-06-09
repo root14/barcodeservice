@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class BarcodeGenerator implements Generator {
     Writer writer;
-   public BarcodeFormat barcodeFormat;
+    public BarcodeFormat barcodeFormat;
 
     @Override
     public BufferedImage generate(String data, int width, int height) throws WriterException {

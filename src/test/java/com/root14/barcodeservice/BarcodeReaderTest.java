@@ -18,7 +18,6 @@ class BarcodeReaderTest {
 
     BarcodeReader barcodeReader = new BarcodeReader();
 
-    //todo
     @Test
     void testRead_validBarcode_returnsResult() throws Exception {
         //src/test/resources/valid_barcode.png

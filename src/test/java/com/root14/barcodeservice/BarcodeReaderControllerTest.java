@@ -78,11 +78,10 @@ class BarcodeReaderControllerTest {
 
         mockMvc.perform(multipart("/read")
                                 .file(barcodeFile)
-                        // .param("hint[PURE_BARCODE]", "true") // Bu satır önceki testler için geçici olarak kaldırılmıştı
+                        // .param("hint[PURE_BARCODE]", "true")
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.text").value("decodedText123"))
-                // DEĞİŞİKLİK BURADA: $.format yerine $.barcodeFormat kullanıldı
                 .andExpect(jsonPath("$.barcodeFormat").value("QR_CODE"));
     }
 
