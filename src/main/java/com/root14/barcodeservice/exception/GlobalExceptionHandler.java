@@ -14,6 +14,13 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Global exception handler for the barcode service.
+ * This class uses Spring's {@link ControllerAdvice} to provide centralized
+ * exception handling across all `@Controller` classes.
+ * It maps various exceptions (e.g., from ZXing library, I/O errors) to appropriate HTTP
+ * status codes and standardized error responses.
+ */
 @ControllerAdvice
 @ResponseBody
 public class GlobalExceptionHandler {
