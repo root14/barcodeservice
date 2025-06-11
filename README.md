@@ -228,8 +228,10 @@ all classes, methods, and parameters throughout the project.
 A browsable HTML version of the documentation can be generated from the source code by using the included Javadoc
 plugin.
 
-You can view the generated Javadoc documentation locally at the following address when application (service) running:
+## Generating JavaDoc
 
-📚 [Local Javadoc Documentation](http://localhost:63342/barcodeservice/apidocs/)
+To generate JavaDoc for this project, run the following command in the root directory:
 
-> Note: This link works only in your local environment with a compatible IDE (e.g., IntelliJ IDEA) and proper project structure.
+```bash
+mvn javadoc:javadoc
+```

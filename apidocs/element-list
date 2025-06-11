@@ -1,9 +1,0 @@
-com.root14.barcodeservice
-com.root14.barcodeservice.config
-com.root14.barcodeservice.controller
-com.root14.barcodeservice.core
-com.root14.barcodeservice.dto
-com.root14.barcodeservice.entity
-com.root14.barcodeservice.exception
-com.root14.barcodeservice.repository
-com.root14.barcodeservice.service

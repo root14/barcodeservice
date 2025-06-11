@@ -1,1 +1,0 @@
-cmd.exe /X /C "C:\Users\ilkay\.jdks\ms-21.0.7\bin\javadoc.exe @options @packages"
