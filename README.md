@@ -11,6 +11,7 @@ PNG images, read barcodes from uploaded image files, and run the entire service 
 * **Read Barcodes**: Read barcode data from an uploaded image file (supports `multipart/form-data` and
   `application/json`).
 * **Dockerized**: Ready to run as a Docker container, with the official image available on Docker Hub.
+* **Well documented**: Comes with auto-generated JavaDoc and OpenAPI (Swagger UI) for easy exploration and integration.
 
 ---
 
@@ -228,10 +229,25 @@ all classes, methods, and parameters throughout the project.
 A browsable HTML version of the documentation can be generated from the source code by using the included Javadoc
 plugin.
 
-## Generating JavaDoc
+### 📖 API Documentation
+This project provides comprehensive API and code-level documentation:
 
-To generate JavaDoc for this project, run the following command in the root directory:
+#### 🔹OpenAPI (Swagger UI)
+You can explore and test the REST API endpoints using Swagger UI.
 
-```bash
-mvn javadoc:javadoc
+Swagger UI: ```http://localhost:8080/swagger/ui```
+
+Swagger JSON: ```http://localhost:8080/swagger/json```
+
+These endpoints are enabled via the following configuration:
 ```
+springdoc.swagger-ui.path=/swagger/ui
+springdoc.swagger-ui.enabled=true
+springdoc.api-docs.path=/swagger/json
+springdoc.api-docs.enabled=true
+```
+### 🔹JavaDoc
+If you build the project using Maven or Gradle, JavaDoc is generated automatically.
+You can view it locally in the /target/site/apidocs (Maven) or build/docs/javadoc (Gradle) directory after running:
+
+```mvn javadoc:javadoc```
